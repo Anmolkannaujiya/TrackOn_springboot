@@ -10,7 +10,7 @@ src/main/resources/application.properties
 .classpath
 .factorypath
 .project
-.settings
+.settingsgit
 .springBeans
 .sts4-cache
 
