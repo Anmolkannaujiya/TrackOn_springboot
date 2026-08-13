@@ -32,8 +32,10 @@ public class TaskMapper {
         return dto;
     }
 
-    public void updateEntity(Task task,TaskRequestDTO){
-        
+    public void updateEntity(Task task,TaskRequestDTO dto){
+        task.setTitle(dto.getTitle());
+        task.setDescription(dto.getDescription());
+        task.setStatus(dto.getStatus());
     }
 
 }

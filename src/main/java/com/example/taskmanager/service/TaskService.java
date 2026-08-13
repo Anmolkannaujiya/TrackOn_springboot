@@ -3,11 +3,14 @@ package com.example.taskmanager.service;
 import com.example.taskmanager.dto.TaskRequestDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.entity.Task;
+import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.exception.TaskNotFoundException;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.repository.TaskRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import java.util.List;
+//import java.util.List;
 
 @Service
 //stereotype annotation
@@ -38,6 +41,7 @@ public class TaskService {
     }
 
     //GET
+    /*
     public List<TaskResponseDTO> getAllTasks(){
 
         //hibernate using findall to return all task
@@ -46,6 +50,25 @@ public class TaskService {
         return tasks.stream()
                 .map(taskMapper::toResponse)
                 .toList();
+    }
+    */
+
+    //GET all tasks but using pagination
+    public Page<TaskResponseDTO> getAllTasks(
+            TaskStatus status,
+            Pageable pageable){
+
+        Page<Task> taskPage;
+
+        //handling both by status and by findall
+        if(status != null){
+            taskPage = taskRepository.findByStatus(status,pageable);
+        }
+        else{
+            taskPage = taskRepository.findAll(pageable);
+        }
+
+        return taskPage.map(taskMapper::toResponse);
     }
 
     //GET by ID
@@ -62,4 +85,28 @@ public class TaskService {
 
         return taskMapper.toResponse(task);
     }
+
+    //put by id
+    public TaskResponseDTO updateTask(Long id,TaskRequestDTO dto){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new TaskNotFoundException(id));
+
+        //saves task current object with dto values
+        taskMapper.updateEntity(task,dto);
+
+        Task updatedtask = taskRepository.save(task);
+
+        return taskMapper.toResponse(updatedtask);
+    }
+
+    //delete by id
+    public void deleteTask(Long id){
+
+        //finding if the task exist or not
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()->new TaskNotFoundException(id));
+
+        taskRepository.delete(task);
+    }
+
 }

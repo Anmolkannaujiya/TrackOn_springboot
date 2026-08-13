@@ -2,6 +2,7 @@ package com.example.taskmanager.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 public class ErrorResponse {
 
@@ -10,6 +11,8 @@ public class ErrorResponse {
     private String error;
     private String message;
     private String path;
+
+    private Map<String,String> errors;
 
     //constructor
     public ErrorResponse(
@@ -25,6 +28,26 @@ public class ErrorResponse {
         this.message = message;
         this.path = path;
     }
+
+    //constrcutor 2, for field errors
+    //this will handle individual fields exception
+    public ErrorResponse(
+            LocalDateTime timestamp,
+            int status,
+            String error,
+            String message,
+            String path,
+            Map<String, String> errors){
+
+        this.timestamp = timestamp;
+        this.status = status;
+        this.error = error;
+        this.message = message;
+        this.path = path;
+        this.errors = errors;
+
+    }
+
 
     //only created getters, not setters
     //so that modifications happens only once
@@ -48,5 +71,10 @@ public class ErrorResponse {
 
     public String getPath() {
         return path;
+    }
+
+    //getter for field errors
+    public Map<String, String> getErrors() {
+        return errors;
     }
 }
