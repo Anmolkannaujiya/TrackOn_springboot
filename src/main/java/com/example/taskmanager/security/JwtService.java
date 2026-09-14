@@ -2,6 +2,9 @@ package com.example.taskmanager.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -10,23 +13,34 @@ import java.util.Date;
 
 @Service
 public class JwtService {
-    private final String SECRET =
-            "my-super-secret-key-for-task-manager-2026";
 
-    private final SecretKey key =
-            Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+    //these are congfig values defined in the properties
+    //earlier we had directly hardcoded them here
+    private final SecretKey key;
+    private final long expiration;
+
+    //constructor
+    public JwtService(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration}") long expiration){
+
+        //key getting value of secret
+        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.expiration = expiration;
+    }
 
     //token generate
-    public String generateToken(String email) {
+    public String generateToken(UserDetails userDetails) {
 
         return Jwts.builder()
-                .subject(email)
+                .subject(userDetails.getUsername())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + 86400000))
+                .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
                 .compact();
     }
 
+    //extract email from jwt
     public String extractEmail(String token) {
 
         return Jwts.parser()
@@ -35,5 +49,20 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    //validate token against user
+    public boolean isTokenValid(
+            String token,
+            UserDetails userDetails){
+
+        String email = extractEmail(token);
+
+        //will check against email as username in userdetail
+        return email.equals(userDetails.getUsername());
+    }
+
+    public Long getExpirationSeconds() {
+        return expiration / 1000;
     }
 }

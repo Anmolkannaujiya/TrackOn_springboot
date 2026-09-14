@@ -19,6 +19,8 @@ public class TaskRequestDTO {
     @NotNull(message = "Status is required")
     private TaskStatus status;
 
+
+
     //getters and setters
     public String getTitle() {
         return title;
@@ -43,4 +45,6 @@ public class TaskRequestDTO {
     public void setStatus(TaskStatus status) {
         this.status = status;
     }
+
+
 }

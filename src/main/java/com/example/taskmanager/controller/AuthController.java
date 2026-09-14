@@ -5,9 +5,10 @@ import com.example.taskmanager.dto.RegisterRequestDTO;
 import com.example.taskmanager.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.taskmanager.dto.AuthResponseDTO;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -32,12 +33,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(
+    public ResponseEntity<AuthResponseDTO> login(
             @Valid @RequestBody LoginRequestDTO request) {
 
-        String token = authService.login(request);
+        AuthResponseDTO response = authService.login(request);
 
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(response);
     }
 
 }

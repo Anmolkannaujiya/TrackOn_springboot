@@ -4,11 +4,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequestDTO {
-    @NotBlank
-    @Email
+    @NotBlank(message = "E-mail is required")
+    @Email(message = "Enter a valid E-mail")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Password is required")
     private String password;
 
     //getter and setter

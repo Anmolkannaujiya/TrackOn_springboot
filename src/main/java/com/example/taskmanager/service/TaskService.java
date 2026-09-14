@@ -3,10 +3,12 @@ package com.example.taskmanager.service;
 import com.example.taskmanager.dto.TaskRequestDTO;
 import com.example.taskmanager.dto.TaskResponseDTO;
 import com.example.taskmanager.entity.Task;
+import com.example.taskmanager.entity.User;
 import com.example.taskmanager.enums.TaskStatus;
 import com.example.taskmanager.exception.TaskNotFoundException;
 import com.example.taskmanager.mapper.TaskMapper;
 import com.example.taskmanager.repository.TaskRepository;
+//import com.example.taskmanager.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,18 +22,28 @@ public class TaskService {
     //mapper object injection
     private final TaskMapper taskMapper;
 
+    //mapping users using currentUser to tasks
+    private final CurrentUserService currentUserService;
+
     //constructor
-    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper) {
+    public TaskService(TaskRepository taskRepository, TaskMapper taskMapper,CurrentUserService currentUserService) {
         this.taskRepository = taskRepository;
         this.taskMapper = taskMapper;
+        this.currentUserService = currentUserService;
     }
 
     //POST
     //replacing Task task with the dto object in the parameter
     public TaskResponseDTO createTask(TaskRequestDTO dto){
 
+        //injecting current user
+        User currentUser = currentUserService.getCurrentUser();
+
         //sending to mapper before saving
         Task task = taskMapper.toEntity(dto);
+
+        //setting the user
+        task.setUser(currentUser);
 
         //after saving returning task entity converting to dto
         Task savedTask = taskRepository.save(task);
@@ -58,14 +70,23 @@ public class TaskService {
             TaskStatus status,
             Pageable pageable){
 
+        User currentUser = currentUserService.getCurrentUser();
+
         Page<Task> taskPage;
 
         //handling both by status and by findall
         if(status != null){
-            taskPage = taskRepository.findByStatus(status,pageable);
+            taskPage = taskRepository.findByUserIdAndStatus(
+                    currentUser.getId(),
+                    status,
+                    pageable
+            );
         }
         else{
-            taskPage = taskRepository.findAll(pageable);
+            taskPage = taskRepository.findByUserId(
+                    currentUser.getId(),
+                    pageable
+            );
         }
 
         return taskPage.map(taskMapper::toResponse);
@@ -80,7 +101,11 @@ public class TaskService {
 
         //the above is general exception, below is more specific
         //user defined exception
-        Task task = taskRepository.findById(id)
+
+        //mapping user-> current user
+        User currentUser = currentUserService.getCurrentUser();
+
+        Task task = taskRepository.findByIdAndUserId(id,currentUser.getId())
                 .orElseThrow(()->new TaskNotFoundException(id));
 
         return taskMapper.toResponse(task);
@@ -88,7 +113,11 @@ public class TaskService {
 
     //put by id
     public TaskResponseDTO updateTask(Long id,TaskRequestDTO dto){
-        Task task = taskRepository.findById(id)
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        Task task = taskRepository
+                .findByIdAndUserId(id,currentUser.getId())
                 .orElseThrow(()-> new TaskNotFoundException(id));
 
         //saves task current object with dto values
@@ -102,8 +131,11 @@ public class TaskService {
     //delete by id
     public void deleteTask(Long id){
 
+        User currentUser = currentUserService.getCurrentUser();
+
         //finding if the task exist or not
-        Task task = taskRepository.findById(id)
+        Task task = taskRepository
+                .findByIdAndUserId(id, currentUser.getId())
                 .orElseThrow(()->new TaskNotFoundException(id));
 
         taskRepository.delete(task);
