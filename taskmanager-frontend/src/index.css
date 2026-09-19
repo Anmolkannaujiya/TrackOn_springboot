@@ -1,0 +1,28 @@
+/* Shared design tokens and a small browser reset. */
+:root {
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #242720;
+  background: #f5f5ef;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+  --paper: #f5f5ef;
+  --white: #fff;
+  --ink: #242720;
+  --muted: #6b6f63;
+  --line: #e0e3d8;
+  --lime: #d4ef80;
+  --radius: 20px;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+button, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+button:focus-visible { outline: 3px solid #65832b; outline-offset: 4px; }
+h1, h2, h3, p { margin: 0; }
+button, input, textarea, select { font-size: 14px; }
+::selection { background: var(--lime); color: var(--ink); }
